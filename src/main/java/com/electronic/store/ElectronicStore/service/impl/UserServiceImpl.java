@@ -4,6 +4,7 @@ import com.electronic.store.ElectronicStore.dtos.UserDto;
 import com.electronic.store.ElectronicStore.entities.User;
 import com.electronic.store.ElectronicStore.repositories.UserRepository;
 import com.electronic.store.ElectronicStore.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,10 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     @Autowired//property injection
     private UserRepository userRepository;
+
+    @Autowired//property injection
+    private ModelMapper mapper;
+
     @Override
     public UserDto createUser(UserDto userDto) {
         //generate unique id in string format
@@ -65,35 +70,41 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByEmail(String email) {
-        return null;
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found with given email id !!"));
+        return entityToDto(user);
     }
 
     @Override
     public List<UserDto> searchUser(String keyword) {
-        return List.of();
+        List<User> users = userRepository.findByNameContaining(keyword);
+        List<UserDto> dtoList = users.stream().map(user -> entityToDto(user)).collect(Collectors.toList());
+        return dtoList;
     }
 
     private UserDto entityToDto(User savedUser) {
-        UserDto userDto= UserDto.builder()
-                .userId(savedUser.getUserId())
-                .name(savedUser.getName())
-                .email(savedUser.getEmail())
-                .password(savedUser.getPassword())
-                .about(savedUser.getAbout())
-                .gender(savedUser.getGender())
-                .imageName(savedUser.getImageName()).build();
-        return userDto;
+        //we have model mapper to convert to dto now
+        //UserDto userDto= UserDto.builder()
+        //        .userId(savedUser.getUserId())
+         //       .name(savedUser.getName())
+          //      .email(savedUser.getEmail())
+          //      .password(savedUser.getPassword())
+          //      .about(savedUser.getAbout())
+          //           .gender(savedUser.getGender())
+              //  .imageName(savedUser.getImageName()).build();
+       // return userDto;
+        return mapper.map(savedUser, UserDto.class);
     }
 
     private User dtoToEntity(UserDto userDto) {
-        User user=User.builder()
-                .userId(userDto.getUserId())
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .password(userDto.getPassword())
-                .about(userDto.getAbout())
-                .gender(userDto.getGender())
-                .imageName(userDto.getImageName()).build();
-        return user;
+        //        User user = User.builder()
+//                .userId(userDto.getUserId())
+//                .name(userDto.getName())
+//                .email(userDto.getEmail())
+//                .password(userDto.getPassword())
+//                .about(userDto.getAbout())
+//                .gender(userDto.getGender())
+//                .imageName(userDto.getImageName())
+//                .build();
+        return mapper.map(userDto, User.class);
     }
 }
