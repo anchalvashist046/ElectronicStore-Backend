@@ -11,7 +11,7 @@ public interface UserService {
     //update
     UserDto updateUser(UserDto userDto, String userId);
     //delete
-    void deleteUser(String userId)
+    void deleteUser(String userId);
     //get all user
     List<UserDto> getAllUser();
     //get single user by id
